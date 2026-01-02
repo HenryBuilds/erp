@@ -29,14 +29,19 @@ export function CodeBlockHighlight({ code, language = "typescript", className }:
       try {
         const { codeToHtml } = await import('shiki')
         const currentTheme = resolvedTheme === 'dark' ? 'github-dark' : 'github-light'
+        
+        // Map env to properties (similar syntax for .env files)
+        const lang = language === 'env' ? 'properties' : language
+        
         const html = await codeToHtml(code, {
-          lang: language,
+          lang: lang,
           theme: currentTheme,
         })
         setHighlightedCode(html)
       } catch (error) {
         console.error('Failed to highlight code:', error)
-        setHighlightedCode(`<pre><code>${code}</code></pre>`)
+        // Fallback to plain code
+        setHighlightedCode(`<pre class="shiki"><code>${code}</code></pre>`)
       }
     }
 

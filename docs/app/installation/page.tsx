@@ -66,7 +66,7 @@ export default function InstallationPage() {
               <CardContent>
                 <CodeBlock
                   code={`DATABASE_URL=postgresql://user:password@localhost:5432/my_erp_db`}
-                  language="env"
+                  language="properties"
                 />
                 <p className="mt-4 text-sm text-muted-foreground">
                   The package automatically reads the DATABASE_URL environment variable.
