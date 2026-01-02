@@ -1,16 +1,54 @@
 {
-  "name": "erp",
-  "module": "index.ts",
+  "name": "commercio",
+  "version": "1.0.0",
+  "description": "Ein modulares Warenwirtschaftssystem (ERP) für Node.js mit PostgreSQL und Drizzle ORM",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "module": "./dist/index.js",
   "type": "module",
-  "private": true,
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "db",
+    "modules"
+  ],
+  "keywords": [
+    "erp",
+    "warehouse",
+    "inventory",
+    "commerce",
+    "drizzle",
+    "postgresql"
+  ],
+  "author": "",
+  "license": "MIT",
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/node": "^20.0.0",
+    "@types/pg": "^8.16.0",
+    "drizzle-kit": "^0.31.8",
+    "tsx": "^4.21.0",
+    "typescript": "^5.0.0"
   },
   "peerDependencies": {
     "typescript": "^5"
   },
   "scripts": {
-    "build": "bun build index.ts --outdir dist --target node",
-    "dev": "bun --watch index.ts"
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "drizzle-orm": "^0.45.1",
+    "pg": "^8.16.3"
   }
 }
