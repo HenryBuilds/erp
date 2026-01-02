@@ -6,3 +6,10 @@ node_modules/
 bun.lock
 tsconfig.json
 .git/
+examples/
+tests/
+*.example.ts
+*.example.js
+*.example.d.ts
+dist/src/
+dist/examples/
