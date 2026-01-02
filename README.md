@@ -1,4 +1,4 @@
-# Commercio
+# Commercio [![Documentation](https://img.shields.io/badge/📖_Documentation-View-blue?style=flat-square)](https://commercio-docs.vercel.app/)
 
 A modular ERP (Enterprise Resource Planning) system for Node.js with PostgreSQL and Drizzle ORM.
 
