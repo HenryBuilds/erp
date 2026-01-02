@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { 
   BookOpen, 
   Rocket, 
@@ -67,9 +68,12 @@ export function Sidebar() {
 
   return (
     <div className="flex h-full w-64 flex-col border-r bg-card">
-      <div className="flex h-16 items-center border-b px-6">
-        <BookOpen className="mr-2 h-5 w-5" />
-        <span className="font-semibold">Commercio Docs</span>
+      <div className="flex h-16 items-center justify-between border-b px-6">
+        <div className="flex items-center">
+          <BookOpen className="mr-2 h-5 w-5" />
+          <span className="font-semibold">Commercio Docs</span>
+        </div>
+        <ThemeToggle />
       </div>
       <nav className="flex-1 space-y-1 p-4">
         {navigation.map((item) => {
