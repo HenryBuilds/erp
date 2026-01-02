@@ -123,3 +123,18 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Shiki syntax highlighting styles */
+.shiki {
+  @apply overflow-x-auto rounded-lg;
+}
+
+.shiki code {
+  @apply font-mono text-sm;
+  counter-reset: step;
+  counter-increment: step 0;
+}
+
+.shiki .line {
+  @apply px-4;
+}
