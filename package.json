@@ -8,5 +8,9 @@
   },
   "peerDependencies": {
     "typescript": "^5"
+  },
+  "scripts": {
+    "build": "bun build index.ts --outdir dist --target node",
+    "dev": "bun --watch index.ts"
   }
 }
