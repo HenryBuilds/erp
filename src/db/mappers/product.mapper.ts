@@ -9,7 +9,14 @@ export class ProductMapper {
    * Transforms a DB row to a Domain model
    */
   static toDomain(row: typeof products.$inferSelect): Product {
-    return new Product(row.id, row.name, row.sku, row.isSellable, row.isActive);
+    return new Product(
+      row.id,
+      row.name,
+      row.sku,
+      row.categoryId,
+      row.isSellable,
+      row.isActive
+    );
   }
 
   /**
@@ -22,6 +29,7 @@ export class ProductMapper {
       id: product.id,
       name: product.name,
       sku: product.sku,
+      categoryId: product.categoryId,
       isSellable: product.isSellable,
       isActive: product.isActive,
     };

@@ -1,5 +1,6 @@
 import { ProductRepository } from "../repositories/product.repository";
 import { Product, ProductId } from "../modules/product/product.model";
+import { CategoryId } from "../modules/category/category.model";
 
 /**
  * Service for Product business logic
@@ -13,6 +14,7 @@ export class ProductService {
   async createProduct(
     name: string,
     sku: string,
+    categoryId: CategoryId,
     isSellable: boolean = true,
     isActive: boolean = true
   ): Promise<Product> {
@@ -26,6 +28,7 @@ export class ProductService {
       crypto.randomUUID(),
       name,
       sku,
+      categoryId,
       isSellable,
       isActive
     );
@@ -70,6 +73,7 @@ export class ProductService {
     updates: {
       name?: string;
       sku?: string;
+      categoryId?: CategoryId;
       isSellable?: boolean;
       isActive?: boolean;
     }
@@ -87,10 +91,18 @@ export class ProductService {
     // Apply updates
     if (updates.name !== undefined) product.name = updates.name;
     if (updates.sku !== undefined) product.sku = updates.sku;
+    if (updates.categoryId !== undefined) product.categoryId = updates.categoryId;
     if (updates.isSellable !== undefined) product.isSellable = updates.isSellable;
     if (updates.isActive !== undefined) product.isActive = updates.isActive;
 
     return await this.productRepository.update(product);
+  }
+
+  /**
+   * Gets products by category
+   */
+  async getProductsByCategory(categoryId: CategoryId): Promise<Product[]> {
+    return await this.productRepository.findByCategory(categoryId);
   }
 
   /**

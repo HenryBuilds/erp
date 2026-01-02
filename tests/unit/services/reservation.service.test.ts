@@ -5,8 +5,10 @@ import { StockRepository } from "../../../src/repositories/stock.repository";
 import { ProductService } from "../../../src/services/product.service";
 import { WarehouseService } from "../../../src/services/warehouse.service";
 import { StockService } from "../../../src/services/stock.service";
+import { CategoryService } from "../../../src/services/category.service";
 import { ProductRepository } from "../../../src/repositories/product.repository";
 import { WarehouseRepository } from "../../../src/repositories/warehouse.repository";
+import { CategoryRepository } from "../../../src/repositories/category.repository";
 import { ReservationStatus } from "../../../src/modules/inventory/reservation.model";
 import { TestDbHelper } from "../../helpers/db";
 
@@ -17,6 +19,7 @@ describe("ReservationService", () => {
   let productService: ProductService;
   let warehouseService: WarehouseService;
   let stockService: StockService;
+  let categoryService: CategoryService;
 
   beforeAll(async () => {
     // Clear database once before all tests in this file
@@ -28,6 +31,7 @@ describe("ReservationService", () => {
     stockRepository = new StockRepository();
     const productRepo = new ProductRepository();
     const warehouseRepo = new WarehouseRepository();
+    const categoryRepo = new CategoryRepository();
 
     reservationService = new ReservationService(
       reservationRepository,
@@ -36,13 +40,16 @@ describe("ReservationService", () => {
     productService = new ProductService(productRepo);
     warehouseService = new WarehouseService(warehouseRepo);
     stockService = new StockService(stockRepository, productRepo, warehouseRepo);
+    categoryService = new CategoryService(categoryRepo);
   });
 
   describe("createReservation", () => {
     it("should create reservation when stock is available", async () => {
+      const category = await categoryService.createCategory(`Category-RES-${Date.now()}-001`);
       const product = await productService.createProduct(
         "Test Product",
-        `SKU-RES-${Date.now()}-001`
+        `SKU-RES-${Date.now()}-001`,
+        category.id
       );
       const warehouse = await warehouseService.createWarehouse("Test Warehouse");
       await stockService.setStock(product.id, warehouse.id, 100);
@@ -61,9 +68,11 @@ describe("ReservationService", () => {
     });
 
     it("should throw error if insufficient stock", async () => {
+      const category = await categoryService.createCategory(`Category-RES-${Date.now()}-002`);
       const product = await productService.createProduct(
         "Test Product",
-        `SKU-RES-${Date.now()}-002`
+        `SKU-RES-${Date.now()}-002`,
+        category.id
       );
       const warehouse = await warehouseService.createWarehouse("Test Warehouse");
       await stockService.setStock(product.id, warehouse.id, 10);
@@ -80,9 +89,11 @@ describe("ReservationService", () => {
     });
 
     it("should consider existing reservations when checking availability", async () => {
+      const category = await categoryService.createCategory(`Category-RES-${Date.now()}-003`);
       const product = await productService.createProduct(
         "Test Product",
-        `SKU-RES-${Date.now()}-003`
+        `SKU-RES-${Date.now()}-003`,
+        category.id
       );
       const warehouse = await warehouseService.createWarehouse("Test Warehouse");
       await stockService.setStock(product.id, warehouse.id, 100);
@@ -119,9 +130,11 @@ describe("ReservationService", () => {
 
   describe("consumeReservation", () => {
     it("should consume active reservation", async () => {
+      const category = await categoryService.createCategory(`Category-RES-${Date.now()}-004`);
       const product = await productService.createProduct(
         "Test Product",
-        `SKU-RES-${Date.now()}-004`
+        `SKU-RES-${Date.now()}-004`,
+        category.id
       );
       const warehouse = await warehouseService.createWarehouse("Test Warehouse");
       await stockService.setStock(product.id, warehouse.id, 100);
@@ -142,9 +155,11 @@ describe("ReservationService", () => {
     });
 
     it("should throw error if reservation is not active", async () => {
+      const category = await categoryService.createCategory(`Category-RES-${Date.now()}-005`);
       const product = await productService.createProduct(
         "Test Product",
-        `SKU-RES-${Date.now()}-005`
+        `SKU-RES-${Date.now()}-005`,
+        category.id
       );
       const warehouse = await warehouseService.createWarehouse("Test Warehouse");
       await stockService.setStock(product.id, warehouse.id, 100);
@@ -168,9 +183,11 @@ describe("ReservationService", () => {
 
   describe("releaseReservation", () => {
     it("should release active reservation", async () => {
+      const category = await categoryService.createCategory(`Category-RES-${Date.now()}-006`);
       const product = await productService.createProduct(
         "Test Product",
-        `SKU-RES-${Date.now()}-006`
+        `SKU-RES-${Date.now()}-006`,
+        category.id
       );
       const warehouse = await warehouseService.createWarehouse("Test Warehouse");
       await stockService.setStock(product.id, warehouse.id, 100);
@@ -193,9 +210,11 @@ describe("ReservationService", () => {
 
   describe("releaseReservationsByReference", () => {
     it("should release all reservations for a reference", async () => {
+      const category = await categoryService.createCategory(`Category-RES-${Date.now()}-007`);
       const product = await productService.createProduct(
         "Test Product",
-        `SKU-RES-${Date.now()}-007`
+        `SKU-RES-${Date.now()}-007`,
+        category.id
       );
       const warehouse = await warehouseService.createWarehouse("Test Warehouse");
       await stockService.setStock(product.id, warehouse.id, 100);

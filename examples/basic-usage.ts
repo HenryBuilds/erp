@@ -13,6 +13,7 @@ import { ProductService } from "../src/services/product.service";
 import { WarehouseService } from "../src/services/warehouse.service";
 import { StockService } from "../src/services/stock.service";
 import { OrderService } from "../src/services/order.service";
+import { CategoryService } from "../src/services/category.service";
 import { ProductRepository } from "../src/repositories/product.repository";
 import { WarehouseRepository } from "../src/repositories/warehouse.repository";
 import { StockRepository } from "../src/repositories/stock.repository";
@@ -21,6 +22,7 @@ import { ReservationRepository } from "../src/repositories/reservation.repositor
 import { ReservationService } from "../src/services/reservation.service";
 import { InventoryTransactionService } from "../src/services/inventory-transaction.service";
 import { InventoryTransactionRepository } from "../src/repositories/inventory-transaction.repository";
+import { CategoryRepository } from "../src/repositories/category.repository";
 import { OrderStatus } from "../src/modules/order/order.model";
 import { logger } from "../src/utils/logger";
 
@@ -41,6 +43,7 @@ async function main() {
   const orderRepo = new OrderRepository();
   const reservationRepo = new ReservationRepository();
   const transactionRepo = new InventoryTransactionRepository();
+  const categoryRepo = new CategoryRepository();
 
   // 3. Create services
   const productService = new ProductService(productRepo);
@@ -56,16 +59,29 @@ async function main() {
     reservationService,
     transactionService
   );
+  const categoryService = new CategoryService(categoryRepo);
 
-  // 4. Create a product
+  // 4. Create a category
+  logger.info("Creating category...");
+  const category = await categoryService.createCategory(
+    "Electronics",
+    "Electronic devices and accessories"
+  );
+  logger.info(
+    { categoryId: category.id, name: category.name },
+    "Created category"
+  );
+
+  // 5. Create a product
   logger.info("Creating product...");
   const product = await productService.createProduct(
     "Laptop Dell XPS 15",
-    "SKU-LAPTOP-001"
+    "SKU-LAPTOP-001",
+    category.id
   );
   logger.info({ productId: product.id, name: product.name }, "Created product");
 
-  // 5. Create a warehouse
+  // 6. Create a warehouse
   logger.info("Creating warehouse...");
   const warehouse = await warehouseService.createWarehouse("Hauptlager Berlin");
   logger.info(
@@ -73,7 +89,7 @@ async function main() {
     "Created warehouse"
   );
 
-  // 6. Set initial stock
+  // 7. Set initial stock
   logger.info("Setting initial stock...");
   await stockService.setStock(product.id, warehouse.id, 50);
   const stock = await stockService.getStock(product.id, warehouse.id);
@@ -86,7 +102,7 @@ async function main() {
     "Stock set"
   );
 
-  // 7. Create an order
+  // 8. Create an order
   logger.info("Creating order...");
   const order = await orderService.createOrder("customer-123", [
     {

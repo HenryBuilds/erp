@@ -1,3 +1,5 @@
+import type { CategoryId } from "../category/category.model";
+
 export type ProductId = string;
 
 export class Product {
@@ -5,6 +7,7 @@ export class Product {
     public readonly id: ProductId,
     public name: string,
     public sku: string,
+    public categoryId: CategoryId,
     public isSellable: boolean = true,
     public isActive: boolean = true
   ) {
@@ -14,6 +17,10 @@ export class Product {
 
     if (!sku) {
       throw new Error("SKU must not be empty");
+    }
+
+    if (!categoryId) {
+      throw new Error("Product must have a category");
     }
   }
 
@@ -25,6 +32,7 @@ export class Product {
     id: ProductId;
     name: string;
     sku: string;
+    categoryId: CategoryId;
     isSellable: boolean;
     isActive: boolean;
   }): Product {
@@ -32,6 +40,7 @@ export class Product {
       data.id,
       data.name,
       data.sku,
+      data.categoryId,
       data.isSellable,
       data.isActive
     );

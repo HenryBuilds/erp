@@ -1,4 +1,5 @@
 // Export all services
+export { CategoryService } from "./category.service";
 export { ProductService } from "./product.service";
 export { WarehouseService } from "./warehouse.service";
 export { StockService } from "./stock.service";

@@ -2,25 +2,20 @@ import { eq, and } from "drizzle-orm";
 import { db } from "../db/db";
 import { products } from "../db/schema/index";
 import { Product, ProductId } from "../modules/product/product.model";
+import { ProductMapper } from "../db/mappers/product.mapper";
 
 export class ProductRepository {
   async create(product: Product): Promise<Product> {
     const [created] = await db
       .insert(products)
-      .values({
-        id: product.id,
-        name: product.name,
-        sku: product.sku,
-        isSellable: product.isSellable,
-        isActive: product.isActive,
-      })
+      .values(ProductMapper.toPersistence(product))
       .returning();
 
     if (!created) {
       throw new Error("Failed to create product");
     }
 
-    return this.toDomain(created);
+    return ProductMapper.toDomain(created);
   }
 
   async findById(id: ProductId): Promise<Product | null> {
@@ -30,7 +25,7 @@ export class ProductRepository {
       .where(eq(products.id, id))
       .limit(1);
 
-    return result ? this.toDomain(result) : null;
+    return result ? ProductMapper.toDomain(result) : null;
   }
 
   async findBySku(sku: string): Promise<Product | null> {
@@ -40,28 +35,33 @@ export class ProductRepository {
       .where(eq(products.sku, sku))
       .limit(1);
 
-    return result ? this.toDomain(result) : null;
+    return result ? ProductMapper.toDomain(result) : null;
+  }
+
+  async findByCategory(categoryId: string): Promise<Product[]> {
+    const results = await db
+      .select()
+      .from(products)
+      .where(eq(products.categoryId, categoryId));
+    return ProductMapper.toDomainMany(results);
   }
 
   async findAll(activeOnly: boolean = false): Promise<Product[]> {
-    const query = db.select().from(products);
+    let query = db.select().from(products);
 
     if (activeOnly) {
-      query.where(eq(products.isActive, true));
+      query = query.where(eq(products.isActive, true)) as any;
     }
 
     const results = await query;
-    return results.map((r) => this.toDomain(r));
+    return ProductMapper.toDomainMany(results);
   }
 
   async update(product: Product): Promise<Product> {
     const [updated] = await db
       .update(products)
       .set({
-        name: product.name,
-        sku: product.sku,
-        isSellable: product.isSellable,
-        isActive: product.isActive,
+        ...ProductMapper.toPersistence(product),
         updatedAt: new Date(),
       })
       .where(eq(products.id, product.id))
@@ -71,15 +71,11 @@ export class ProductRepository {
       throw new Error("Failed to update product");
     }
 
-    return this.toDomain(updated);
+    return ProductMapper.toDomain(updated);
   }
 
   async delete(id: ProductId): Promise<boolean> {
     const result = await db.delete(products).where(eq(products.id, id));
     return result.rowCount ? result.rowCount > 0 : false;
-  }
-
-  private toDomain(row: typeof products.$inferSelect): Product {
-    return new Product(row.id, row.name, row.sku, row.isSellable, row.isActive);
   }
 }

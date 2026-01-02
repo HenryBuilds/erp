@@ -16,6 +16,7 @@ export { runMigrations, runMigrationsWithDb } from "./db/migrate";
 export { logger, createLogger } from "./utils/logger";
 
 // Models
+export * from "./modules/category/category.model";
 export * from "./modules/product/product.model";
 export * from "./modules/warehouse/warehouse.model";
 export * from "./modules/inventory/inventory.model";
@@ -24,6 +25,7 @@ export * from "./modules/inventory/stock.model";
 export * from "./modules/order/order.model";
 
 // Repositories
+export { CategoryRepository } from "./repositories/category.repository";
 export { ProductRepository } from "./repositories/product.repository";
 export { WarehouseRepository } from "./repositories/warehouse.repository";
 export { StockRepository } from "./repositories/stock.repository";

@@ -1,3 +1,4 @@
+import { Category } from "../../src/modules/category/category.model";
 import { Product } from "../../src/modules/product/product.model";
 import { Warehouse } from "../../src/modules/warehouse/warehouse.model";
 import { Stock } from "../../src/modules/inventory/stock.model";
@@ -19,11 +20,24 @@ import {
  * Factory functions for creating test data
  */
 export class TestFactories {
-  static createProduct(overrides?: Partial<Product>): Product {
+  static createCategory(overrides?: Partial<Category>): Category {
+    return new Category(
+      overrides?.id || crypto.randomUUID(),
+      overrides?.name || `Category-${Date.now()}`,
+      overrides?.description ?? null,
+      overrides?.isActive ?? true
+    );
+  }
+
+  static createProduct(overrides?: Partial<Product> & { categoryId: string }): Product {
+    if (!overrides?.categoryId) {
+      throw new Error("Product must have a categoryId. Create a category first or provide categoryId in overrides.");
+    }
     return new Product(
       overrides?.id || crypto.randomUUID(),
       overrides?.name || "Test Product",
       overrides?.sku || `SKU-${Date.now()}`,
+      overrides.categoryId,
       overrides?.isSellable ?? true,
       overrides?.isActive ?? true
     );

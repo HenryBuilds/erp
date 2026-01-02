@@ -1,4 +1,5 @@
 // Export all mappers
+export { CategoryMapper } from "./category.mapper";
 export { ProductMapper } from "./product.mapper";
 export { WarehouseMapper } from "./warehouse.mapper";
 export { StockMapper } from "./stock.mapper";

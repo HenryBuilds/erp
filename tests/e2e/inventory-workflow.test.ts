@@ -4,10 +4,12 @@ import { ProductService } from "../../src/services/product.service";
 import { WarehouseService } from "../../src/services/warehouse.service";
 import { StockService } from "../../src/services/stock.service";
 import { InventoryTransactionService } from "../../src/services/inventory-transaction.service";
+import { CategoryService } from "../../src/services/category.service";
 import { ProductRepository } from "../../src/repositories/product.repository";
 import { WarehouseRepository } from "../../src/repositories/warehouse.repository";
 import { StockRepository } from "../../src/repositories/stock.repository";
 import { InventoryTransactionRepository } from "../../src/repositories/inventory-transaction.repository";
+import { CategoryRepository } from "../../src/repositories/category.repository";
 import { InventoryTransactionType } from "../../src/modules/inventory/inventory.model";
 
 describe("E2E: Inventory Workflow", () => {
@@ -15,12 +17,14 @@ describe("E2E: Inventory Workflow", () => {
   let warehouseService: WarehouseService;
   let stockService: StockService;
   let transactionService: InventoryTransactionService;
+  let categoryService: CategoryService;
 
   beforeEach(() => {
     const productRepo = new ProductRepository();
     const warehouseRepo = new WarehouseRepository();
     const stockRepo = new StockRepository();
     const transactionRepo = new InventoryTransactionRepository();
+    const categoryRepo = new CategoryRepository();
 
     productService = new ProductService(productRepo);
     warehouseService = new WarehouseService(warehouseRepo);
@@ -29,12 +33,15 @@ describe("E2E: Inventory Workflow", () => {
       transactionRepo,
       stockRepo
     );
+    categoryService = new CategoryService(categoryRepo);
   });
 
   it("should handle receipt transaction and increase stock", async () => {
+    const category = await categoryService.createCategory(`Category-INV-${Date.now()}-001`);
     const product = await productService.createProduct(
       "Test Product",
-      `SKU-INV-${Date.now()}-001`
+      `SKU-INV-${Date.now()}-001`,
+      category.id
     );
     const warehouse = await warehouseService.createWarehouse("Main Warehouse");
 
@@ -60,9 +67,11 @@ describe("E2E: Inventory Workflow", () => {
   });
 
   it("should handle shipment transaction and decrease stock", async () => {
+    const category = await categoryService.createCategory(`Category-INV-${Date.now()}-002`);
     const product = await productService.createProduct(
       "Test Product",
-      `SKU-INV-${Date.now()}-002`
+      `SKU-INV-${Date.now()}-002`,
+      category.id
     );
     const warehouse = await warehouseService.createWarehouse("Main Warehouse");
 
@@ -86,9 +95,11 @@ describe("E2E: Inventory Workflow", () => {
   });
 
   it("should prevent shipment if insufficient stock", async () => {
+    const category = await categoryService.createCategory(`Category-INV-${Date.now()}-003`);
     const product = await productService.createProduct(
       "Test Product",
-      `SKU-INV-${Date.now()}-003`
+      `SKU-INV-${Date.now()}-003`,
+      category.id
     );
     const warehouse = await warehouseService.createWarehouse("Main Warehouse");
 
@@ -108,9 +119,11 @@ describe("E2E: Inventory Workflow", () => {
   });
 
   it("should handle return transaction and increase stock", async () => {
+    const category = await categoryService.createCategory(`Category-INV-${Date.now()}-004`);
     const product = await productService.createProduct(
       "Test Product",
-      `SKU-INV-${Date.now()}-004`
+      `SKU-INV-${Date.now()}-004`,
+      category.id
     );
     const warehouse = await warehouseService.createWarehouse("Main Warehouse");
 
@@ -134,9 +147,11 @@ describe("E2E: Inventory Workflow", () => {
   });
 
   it("should handle adjustment transaction and set stock", async () => {
+    const category = await categoryService.createCategory(`Category-INV-${Date.now()}-005`);
     const product = await productService.createProduct(
       "Test Product",
-      `SKU-INV-${Date.now()}-005`
+      `SKU-INV-${Date.now()}-005`,
+      category.id
     );
     const warehouse = await warehouseService.createWarehouse("Main Warehouse");
 
@@ -160,9 +175,11 @@ describe("E2E: Inventory Workflow", () => {
   });
 
   it("should track transaction history", async () => {
+    const category = await categoryService.createCategory(`Category-INV-${Date.now()}-006`);
     const product = await productService.createProduct(
       "Test Product",
-      `SKU-INV-${Date.now()}-006`
+      `SKU-INV-${Date.now()}-006`,
+      category.id
     );
     const warehouse = await warehouseService.createWarehouse("Main Warehouse");
 

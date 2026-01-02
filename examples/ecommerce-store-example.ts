@@ -13,6 +13,7 @@ import {
   StockService,
   OrderService,
   ReservationService,
+  CategoryService,
   ProductRepository,
   WarehouseRepository,
   StockRepository,
@@ -20,6 +21,7 @@ import {
   ReservationRepository,
   InventoryTransactionService,
   InventoryTransactionRepository,
+  CategoryRepository,
   OrderStatus,
 } from "../src/index";
 import { logger } from "../src/utils/logger";
@@ -32,6 +34,7 @@ function initializeServices() {
   const orderRepo = new OrderRepository();
   const reservationRepo = new ReservationRepository();
   const transactionRepo = new InventoryTransactionRepository();
+  const categoryRepo = new CategoryRepository();
 
   const productService = new ProductService(productRepo);
   const warehouseService = new WarehouseService(warehouseRepo);
@@ -46,6 +49,7 @@ function initializeServices() {
     reservationService,
     transactionService
   );
+  const categoryService = new CategoryService(categoryRepo);
 
   return {
     productService,
@@ -53,6 +57,7 @@ function initializeServices() {
     stockService,
     orderService,
     reservationService,
+    categoryService,
   };
 }
 

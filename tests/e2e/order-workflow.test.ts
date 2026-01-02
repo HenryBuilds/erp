@@ -6,12 +6,14 @@ import { StockService } from "../../src/services/stock.service";
 import { OrderService } from "../../src/services/order.service";
 import { InventoryTransactionService } from "../../src/services/inventory-transaction.service";
 import { ReservationService } from "../../src/services/reservation.service";
+import { CategoryService } from "../../src/services/category.service";
 import { ProductRepository } from "../../src/repositories/product.repository";
 import { WarehouseRepository } from "../../src/repositories/warehouse.repository";
 import { StockRepository } from "../../src/repositories/stock.repository";
 import { OrderRepository } from "../../src/repositories/order.repository";
 import { InventoryTransactionRepository } from "../../src/repositories/inventory-transaction.repository";
 import { ReservationRepository } from "../../src/repositories/reservation.repository";
+import { CategoryRepository } from "../../src/repositories/category.repository";
 import { OrderStatus } from "../../src/modules/order/order.model";
 import { InventoryTransactionType } from "../../src/modules/inventory/inventory.model";
 
@@ -22,6 +24,7 @@ describe("E2E: Order Workflow", () => {
   let orderService: OrderService;
   let transactionService: InventoryTransactionService;
   let reservationService: ReservationService;
+  let categoryService: CategoryService;
 
   beforeEach(() => {
     // Initialize services
@@ -31,6 +34,7 @@ describe("E2E: Order Workflow", () => {
     const orderRepo = new OrderRepository();
     const transactionRepo = new InventoryTransactionRepository();
     const reservationRepo = new ReservationRepository();
+    const categoryRepo = new CategoryRepository();
 
     productService = new ProductService(productRepo);
     warehouseService = new WarehouseService(warehouseRepo);
@@ -45,13 +49,16 @@ describe("E2E: Order Workflow", () => {
       reservationService,
       transactionService
     );
+    categoryService = new CategoryService(categoryRepo);
   });
 
   it("should complete full order workflow: create -> confirm -> pay -> ship -> complete", async () => {
     // Setup: Create product and warehouse with stock
+    const category = await categoryService.createCategory(`Category-E2E-${Date.now()}-001`);
     const product = await productService.createProduct(
       "Test Product",
-      `SKU-E2E-${Date.now()}-001`
+      `SKU-E2E-${Date.now()}-001`,
+      category.id
     );
     const warehouse = await warehouseService.createWarehouse("Main Warehouse");
     await stockService.setStock(product.id, warehouse.id, 100);
@@ -118,9 +125,11 @@ describe("E2E: Order Workflow", () => {
 
   it("should handle order cancellation and release reservations", async () => {
     // Setup
+    const category = await categoryService.createCategory(`Category-E2E-${Date.now()}-002`);
     const product = await productService.createProduct(
       "Test Product",
-      `SKU-E2E-${Date.now()}-002`
+      `SKU-E2E-${Date.now()}-002`,
+      category.id
     );
     const warehouse = await warehouseService.createWarehouse("Main Warehouse");
     await stockService.setStock(product.id, warehouse.id, 100);
@@ -154,9 +163,11 @@ describe("E2E: Order Workflow", () => {
 
   it("should handle order return workflow", async () => {
     // Setup and complete order
+    const category = await categoryService.createCategory(`Category-E2E-${Date.now()}-003`);
     const product = await productService.createProduct(
       "Test Product",
-      `SKU-E2E-${Date.now()}-003`
+      `SKU-E2E-${Date.now()}-003`,
+      category.id
     );
     const warehouse = await warehouseService.createWarehouse("Main Warehouse");
     await stockService.setStock(product.id, warehouse.id, 100);
@@ -207,9 +218,11 @@ describe("E2E: Order Workflow", () => {
 
   it("should prevent order confirmation if insufficient stock", async () => {
     // Setup with limited stock
+    const category = await categoryService.createCategory(`Category-E2E-${Date.now()}-004`);
     const product = await productService.createProduct(
       "Test Product",
-      `SKU-E2E-${Date.now()}-004`
+      `SKU-E2E-${Date.now()}-004`,
+      category.id
     );
     const warehouse = await warehouseService.createWarehouse("Main Warehouse");
     await stockService.setStock(product.id, warehouse.id, 5); // Only 5 in stock

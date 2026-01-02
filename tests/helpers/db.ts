@@ -24,8 +24,9 @@ export class TestDbHelper {
     this.clearingPromise = (async () => {
       try {
         // Use a single TRUNCATE with all tables to minimize lock contention
+        // Categories must be truncated after products due to foreign key constraint
         await db.execute(
-          sql`TRUNCATE TABLE order_items, orders, reservations, inventory_transactions, stock, products, warehouses RESTART IDENTITY CASCADE`
+          sql`TRUNCATE TABLE order_items, orders, reservations, inventory_transactions, stock, products, categories, warehouses RESTART IDENTITY CASCADE`
         );
       } finally {
         this.clearingLock = false;

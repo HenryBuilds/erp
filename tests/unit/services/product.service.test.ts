@@ -1,12 +1,16 @@
 import { describe, it, expect, beforeEach, beforeAll } from "vitest";
 import { ProductService } from "../../../src/services/product.service";
 import { ProductRepository } from "../../../src/repositories/product.repository";
+import { CategoryService } from "../../../src/services/category.service";
+import { CategoryRepository } from "../../../src/repositories/category.repository";
 import { Product } from "../../../src/modules/product/product.model";
 import { TestDbHelper } from "../../helpers/db";
 
 describe("ProductService", () => {
   let productService: ProductService;
   let productRepository: ProductRepository;
+  let categoryService: CategoryService;
+  let categoryRepository: CategoryRepository;
 
   beforeAll(async () => {
     // Clear database once before all tests in this file
@@ -15,34 +19,51 @@ describe("ProductService", () => {
 
   beforeEach(() => {
     productRepository = new ProductRepository();
+    categoryRepository = new CategoryRepository();
     productService = new ProductService(productRepository);
+    categoryService = new CategoryService(categoryRepository);
   });
 
   describe("createProduct", () => {
     it("should create a product successfully", async () => {
+      const category = await categoryService.createCategory(
+        `Category-TEST-${Date.now()}-001`
+      );
       const sku = `SKU-TEST-${Date.now()}-001`;
-      const product = await productService.createProduct("Test Product", sku);
+      const product = await productService.createProduct(
+        "Test Product",
+        sku,
+        category.id
+      );
 
       expect(product).toBeInstanceOf(Product);
       expect(product.name).toBe("Test Product");
       expect(product.sku).toBe(sku);
+      expect(product.categoryId).toBe(category.id);
       expect(product.isSellable).toBe(true);
       expect(product.isActive).toBe(true);
     });
 
     it("should throw error if SKU already exists", async () => {
+      const category = await categoryService.createCategory(
+        `Category-TEST-${Date.now()}-002`
+      );
       const sku = `SKU-DUPLICATE-${Date.now()}`;
-      await productService.createProduct("Product 1", sku);
+      await productService.createProduct("Product 1", sku, category.id);
 
       await expect(
-        productService.createProduct("Product 2", sku)
+        productService.createProduct("Product 2", sku, category.id)
       ).rejects.toThrow("already exists");
     });
 
     it("should create product with custom flags", async () => {
+      const category = await categoryService.createCategory(
+        `Category-TEST-${Date.now()}-003`
+      );
       const product = await productService.createProduct(
         "Test Product",
         `SKU-TEST-${Date.now()}-002`,
+        category.id,
         false,
         false
       );
@@ -54,9 +75,13 @@ describe("ProductService", () => {
 
   describe("getProductById", () => {
     it("should return product if exists", async () => {
+      const category = await categoryService.createCategory(
+        `Category-TEST-${Date.now()}-004`
+      );
       const created = await productService.createProduct(
         "Test Product",
-        `SKU-TEST-${Date.now()}-003`
+        `SKU-TEST-${Date.now()}-003`,
+        category.id
       );
 
       const product = await productService.getProductById(created.id);
@@ -75,8 +100,11 @@ describe("ProductService", () => {
 
   describe("getProductBySku", () => {
     it("should return product by SKU", async () => {
+      const category = await categoryService.createCategory(
+        `Category-TEST-${Date.now()}-005`
+      );
       const sku = `SKU-TEST-${Date.now()}-004`;
-      await productService.createProduct("Test Product", sku);
+      await productService.createProduct("Test Product", sku, category.id);
 
       const product = await productService.getProductBySku(sku);
 
@@ -93,8 +121,15 @@ describe("ProductService", () => {
 
   describe("updateProduct", () => {
     it("should update product successfully", async () => {
+      const category = await categoryService.createCategory(
+        `Category-TEST-${Date.now()}-006`
+      );
       const sku = `SKU-TEST-${Date.now()}-005`;
-      const created = await productService.createProduct("Original Name", sku);
+      const created = await productService.createProduct(
+        "Original Name",
+        sku,
+        category.id
+      );
 
       const updated = await productService.updateProduct(created.id, {
         name: "Updated Name",
@@ -107,10 +142,17 @@ describe("ProductService", () => {
     });
 
     it("should throw error if SKU already exists", async () => {
+      const category = await categoryService.createCategory(
+        `Category-TEST-${Date.now()}-007`
+      );
       const sku1 = `SKU-TEST-${Date.now()}-006`;
       const sku2 = `SKU-TEST-${Date.now()}-007`;
-      await productService.createProduct("Product 1", sku1);
-      const product2 = await productService.createProduct("Product 2", sku2);
+      await productService.createProduct("Product 1", sku1, category.id);
+      const product2 = await productService.createProduct(
+        "Product 2",
+        sku2,
+        category.id
+      );
 
       await expect(
         productService.updateProduct(product2.id, { sku: sku1 })
@@ -120,9 +162,13 @@ describe("ProductService", () => {
 
   describe("deactivateProduct", () => {
     it("should deactivate product", async () => {
+      const category = await categoryService.createCategory(
+        `Category-TEST-${Date.now()}-008`
+      );
       const created = await productService.createProduct(
         "Test Product",
-        `SKU-TEST-${Date.now()}-008`
+        `SKU-TEST-${Date.now()}-008`,
+        category.id
       );
 
       const deactivated = await productService.deactivateProduct(created.id);
@@ -133,9 +179,13 @@ describe("ProductService", () => {
 
   describe("activateProduct", () => {
     it("should activate product", async () => {
+      const category = await categoryService.createCategory(
+        `Category-TEST-${Date.now()}-009`
+      );
       const created = await productService.createProduct(
         "Test Product",
         `SKU-TEST-${Date.now()}-009`,
+        category.id,
         true,
         false
       );
