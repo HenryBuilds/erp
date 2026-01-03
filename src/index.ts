@@ -18,11 +18,14 @@ export { logger, createLogger } from "./utils/logger";
 // Models
 export * from "./modules/category/category.model";
 export * from "./modules/product/product.model";
+export * from "./modules/product/variant-attribute.model";
+export * from "./modules/product/product-variant.model";
 export * from "./modules/warehouse/warehouse.model";
 export * from "./modules/inventory/inventory.model";
 export * from "./modules/inventory/reservation.model";
 export * from "./modules/inventory/stock.model";
 export * from "./modules/order/order.model";
+export * from "./modules/customer/customer.model";
 
 // Repositories
 export { CategoryRepository } from "./repositories/category.repository";
@@ -32,6 +35,10 @@ export { StockRepository } from "./repositories/stock.repository";
 export { InventoryTransactionRepository } from "./repositories/inventory-transaction.repository";
 export { OrderRepository } from "./repositories/order.repository";
 export { ReservationRepository } from "./repositories/reservation.repository";
+export { VariantAttributeRepository } from "./repositories/variant-attribute.repository";
+export { ProductVariantRepository } from "./repositories/product-variant.repository";
+export { CustomerRepository } from "./repositories/customer.repository";
+export { CustomerGroupRepository } from "./repositories/customer-group.repository";
 
 // Services (business logic layer)
 export * from "./services/index";

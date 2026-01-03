@@ -12,12 +12,11 @@ describe("StockService", () => {
   let warehouseService: WarehouseService;
   let categoryService: CategoryService;
 
-  beforeAll(async () => {
-    // Clear database once before all tests in this file
+  beforeEach(async () => {
+    // Clear database before each test to ensure clean state
     await TestDbHelper.clearAllTables();
-  });
-
-  beforeEach(() => {
+    
+    // Create services after clearing database
     const services = createServices();
     stockService = services.stockService;
     productService = services.productService;
@@ -28,6 +27,8 @@ describe("StockService", () => {
   describe("setStock", () => {
     it("should set stock successfully", async () => {
       const category = await categoryService.createCategory(`Category-STOCK-${Date.now()}-001`);
+      // Verify category exists before creating product
+      await categoryService.getCategoryById(category.id);
       const product = await productService.createProduct(
         "Test Product",
         `SKU-STOCK-${Date.now()}-001`,
@@ -57,6 +58,8 @@ describe("StockService", () => {
 
     it("should throw error if warehouse does not exist", async () => {
       const category = await categoryService.createCategory(`Category-STOCK-${Date.now()}-002`);
+      // Verify category exists before creating product
+      await categoryService.getCategoryById(category.id);
       const product = await productService.createProduct(
         "Test Product",
         `SKU-STOCK-${Date.now()}-002`,
@@ -73,6 +76,8 @@ describe("StockService", () => {
   describe("adjustStock", () => {
     it("should increase stock", async () => {
       const category = await categoryService.createCategory(`Category-STOCK-${Date.now()}-003`);
+      // Verify category exists before creating product
+      await categoryService.getCategoryById(category.id);
       const product = await productService.createProduct(
         "Test Product",
         `SKU-STOCK-${Date.now()}-003`,
@@ -92,6 +97,8 @@ describe("StockService", () => {
 
     it("should decrease stock", async () => {
       const category = await categoryService.createCategory(`Category-STOCK-${Date.now()}-004`);
+      // Verify category exists before creating product
+      await categoryService.getCategoryById(category.id);
       const product = await productService.createProduct(
         "Test Product",
         `SKU-STOCK-${Date.now()}-004`,
@@ -111,6 +118,8 @@ describe("StockService", () => {
 
     it("should throw error if stock would go negative", async () => {
       const category = await categoryService.createCategory(`Category-STOCK-${Date.now()}-005`);
+      // Verify category exists before creating product
+      await categoryService.getCategoryById(category.id);
       const product = await productService.createProduct(
         "Test Product",
         `SKU-STOCK-${Date.now()}-005`,
@@ -129,6 +138,8 @@ describe("StockService", () => {
   describe("getTotalStock", () => {
     it("should calculate total stock across warehouses", async () => {
       const category = await categoryService.createCategory(`Category-STOCK-${Date.now()}-006`);
+      // Verify category exists before creating product
+      await categoryService.getCategoryById(category.id);
       const product = await productService.createProduct(
         "Test Product",
         `SKU-STOCK-${Date.now()}-006`,
@@ -147,6 +158,8 @@ describe("StockService", () => {
 
     it("should return 0 if no stock exists", async () => {
       const category = await categoryService.createCategory(`Category-STOCK-${Date.now()}-007`);
+      // Verify category exists before creating product
+      await categoryService.getCategoryById(category.id);
       const product = await productService.createProduct(
         "Test Product",
         `SKU-STOCK-${Date.now()}-007`,

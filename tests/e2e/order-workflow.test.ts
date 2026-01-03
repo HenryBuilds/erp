@@ -8,6 +8,7 @@ import { OrderService } from "../../src/services/order.service";
 import { InventoryTransactionService } from "../../src/services/inventory-transaction.service";
 import { ReservationService } from "../../src/services/reservation.service";
 import { CategoryService } from "../../src/services/category.service";
+import { CustomerService } from "../../src/services/customer.service";
 import { OrderStatus } from "../../src/modules/order/order.model";
 import { InventoryTransactionType } from "../../src/modules/inventory/inventory.model";
 
@@ -19,6 +20,7 @@ describe("E2E: Order Workflow", () => {
   let transactionService: InventoryTransactionService;
   let reservationService: ReservationService;
   let categoryService: CategoryService;
+  let customerService: CustomerService;
 
   beforeEach(() => {
     // Initialize all services at once
@@ -30,10 +32,21 @@ describe("E2E: Order Workflow", () => {
     transactionService = services.inventoryTransactionService;
     reservationService = services.reservationService;
     categoryService = services.categoryService;
+    customerService = services.customerService;
   });
 
   it("should complete full order workflow: create -> confirm -> pay -> ship -> complete", async () => {
-    // Setup: Create product and warehouse with stock
+    // Setup: Create customer, product and warehouse with stock
+    const customer = await customerService.createCustomer(
+      "Test Customer",
+      {
+        street: "123 Test St",
+        city: "Berlin",
+        postalCode: "10115",
+        country: "Germany",
+      },
+      { email: `test.${Date.now()}@example.com` }
+    );
     const category = await categoryService.createCategory(`Category-E2E-${Date.now()}-001`);
     const product = await productService.createProduct(
       "Test Product",
@@ -44,7 +57,7 @@ describe("E2E: Order Workflow", () => {
     await stockService.setStock(product.id, warehouse.id, 100);
 
     // Step 1: Create order
-    const order = await orderService.createOrder("customer-123", [
+    const order = await orderService.createOrder(customer.id, [
       {
         productId: product.id,
         quantity: 5,
@@ -105,6 +118,16 @@ describe("E2E: Order Workflow", () => {
 
   it("should handle order cancellation and release reservations", async () => {
     // Setup
+    const customer = await customerService.createCustomer(
+      "Test Customer",
+      {
+        street: "123 Test St",
+        city: "Berlin",
+        postalCode: "10115",
+        country: "Germany",
+      },
+      { email: `test.${Date.now()}@example.com` }
+    );
     const category = await categoryService.createCategory(`Category-E2E-${Date.now()}-002`);
     const product = await productService.createProduct(
       "Test Product",
@@ -115,7 +138,7 @@ describe("E2E: Order Workflow", () => {
     await stockService.setStock(product.id, warehouse.id, 100);
 
     // Create and confirm order
-    const order = await orderService.createOrder("customer-123", [
+    const order = await orderService.createOrder(customer.id, [
       {
         productId: product.id,
         quantity: 10,
@@ -143,6 +166,16 @@ describe("E2E: Order Workflow", () => {
 
   it("should handle order return workflow", async () => {
     // Setup and complete order
+    const customer = await customerService.createCustomer(
+      "Test Customer",
+      {
+        street: "123 Test St",
+        city: "Berlin",
+        postalCode: "10115",
+        country: "Germany",
+      },
+      { email: `test.${Date.now()}@example.com` }
+    );
     const category = await categoryService.createCategory(`Category-E2E-${Date.now()}-003`);
     const product = await productService.createProduct(
       "Test Product",
@@ -152,7 +185,7 @@ describe("E2E: Order Workflow", () => {
     const warehouse = await warehouseService.createWarehouse("Main Warehouse");
     await stockService.setStock(product.id, warehouse.id, 100);
 
-    const order = await orderService.createOrder("customer-123", [
+    const order = await orderService.createOrder(customer.id, [
       {
         productId: product.id,
         quantity: 5,
@@ -198,6 +231,16 @@ describe("E2E: Order Workflow", () => {
 
   it("should prevent order confirmation if insufficient stock", async () => {
     // Setup with limited stock
+    const customer = await customerService.createCustomer(
+      "Test Customer",
+      {
+        street: "123 Test St",
+        city: "Berlin",
+        postalCode: "10115",
+        country: "Germany",
+      },
+      { email: `test.${Date.now()}@example.com` }
+    );
     const category = await categoryService.createCategory(`Category-E2E-${Date.now()}-004`);
     const product = await productService.createProduct(
       "Test Product",
@@ -208,7 +251,7 @@ describe("E2E: Order Workflow", () => {
     await stockService.setStock(product.id, warehouse.id, 5); // Only 5 in stock
 
     // Create order for 10 items
-    const order = await orderService.createOrder("customer-123", [
+    const order = await orderService.createOrder(customer.id, [
       {
         productId: product.id,
         quantity: 10,

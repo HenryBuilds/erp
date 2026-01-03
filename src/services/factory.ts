@@ -12,6 +12,9 @@ import { StockService } from "./stock.service";
 import { ReservationService } from "./reservation.service";
 import { InventoryTransactionService } from "./inventory-transaction.service";
 import { OrderService } from "./order.service";
+import { VariantAttributeService } from "./variant-attribute.service";
+import { ProductVariantService } from "./product-variant.service";
+import { CustomerService } from "./customer.service";
 
 import { CategoryRepository } from "../repositories/category.repository";
 import { ProductRepository } from "../repositories/product.repository";
@@ -20,6 +23,10 @@ import { StockRepository } from "../repositories/stock.repository";
 import { ReservationRepository } from "../repositories/reservation.repository";
 import { InventoryTransactionRepository } from "../repositories/inventory-transaction.repository";
 import { OrderRepository } from "../repositories/order.repository";
+import { VariantAttributeRepository } from "../repositories/variant-attribute.repository";
+import { ProductVariantRepository } from "../repositories/product-variant.repository";
+import { CustomerRepository } from "../repositories/customer.repository";
+import { CustomerGroupRepository } from "../repositories/customer-group.repository";
 
 /**
  * Creates a CategoryService with default repository.
@@ -127,6 +134,48 @@ export function createOrderService(options?: {
 }
 
 /**
+ * Creates a VariantAttributeService with default repository.
+ * Pass a custom repository for testing.
+ */
+export function createVariantAttributeService(
+  repository?: VariantAttributeRepository
+): VariantAttributeService {
+  return new VariantAttributeService(
+    repository || new VariantAttributeRepository()
+  );
+}
+
+/**
+ * Creates a ProductVariantService with default repositories.
+ * Pass custom repositories for testing.
+ */
+export function createProductVariantService(options?: {
+  productVariantRepository?: ProductVariantRepository;
+  productRepository?: ProductRepository;
+}): ProductVariantService {
+  return new ProductVariantService(
+    options?.productVariantRepository || new ProductVariantRepository(),
+    options?.productRepository || new ProductRepository()
+  );
+}
+
+/**
+ * Creates a CustomerService with default repositories.
+ * Pass custom repositories for testing.
+ */
+export function createCustomerService(options?: {
+  customerRepository?: CustomerRepository;
+  customerGroupRepository?: CustomerGroupRepository;
+  orderRepository?: OrderRepository;
+}): CustomerService {
+  return new CustomerService(
+    options?.customerRepository || new CustomerRepository(),
+    options?.customerGroupRepository || new CustomerGroupRepository(),
+    options?.orderRepository || new OrderRepository()
+  );
+}
+
+/**
  * Creates all services at once with default repositories.
  * This is convenient for most use cases.
  *
@@ -140,7 +189,12 @@ export function createServices(options?: {
   reservationRepository?: ReservationRepository;
   transactionRepository?: InventoryTransactionRepository;
   orderRepository?: OrderRepository;
+  variantAttributeRepository?: VariantAttributeRepository;
+  productVariantRepository?: ProductVariantRepository;
+  customerRepository?: CustomerRepository;
+  customerGroupRepository?: CustomerGroupRepository;
 }) {
+  // Note: orderRepository is shared between OrderService and CustomerService
   // Create repositories (shared instances)
   const categoryRepo = options?.categoryRepository || new CategoryRepository();
   const productRepo = options?.productRepository || new ProductRepository();
@@ -152,6 +206,15 @@ export function createServices(options?: {
   const transactionRepo =
     options?.transactionRepository || new InventoryTransactionRepository();
   const orderRepo = options?.orderRepository || new OrderRepository();
+  const variantAttributeRepo =
+    options?.variantAttributeRepository || new VariantAttributeRepository();
+  const productVariantRepo =
+    options?.productVariantRepository || new ProductVariantRepository();
+  const customerRepo =
+    options?.customerRepository || new CustomerRepository();
+  const customerGroupRepo =
+    options?.customerGroupRepository || new CustomerGroupRepository();
+  const orderRepoForCustomer = options?.orderRepository || new OrderRepository();
 
   // Create services
   const categoryService = new CategoryService(categoryRepo);
@@ -168,6 +231,18 @@ export function createServices(options?: {
     reservationService,
     inventoryTransactionService
   );
+  const variantAttributeService = new VariantAttributeService(
+    variantAttributeRepo
+  );
+  const productVariantService = new ProductVariantService(
+    productVariantRepo,
+    productRepo
+  );
+  const customerService = new CustomerService(
+    customerRepo,
+    customerGroupRepo,
+    orderRepoForCustomer
+  );
 
   return {
     categoryService,
@@ -177,5 +252,8 @@ export function createServices(options?: {
     reservationService,
     inventoryTransactionService,
     orderService,
+    variantAttributeService,
+    productVariantService,
+    customerService,
   };
 }

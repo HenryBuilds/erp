@@ -15,12 +15,11 @@ describe("ReservationService", () => {
   let stockService: StockService;
   let categoryService: CategoryService;
 
-  beforeAll(async () => {
-    // Clear database once before all tests in this file
+  beforeEach(async () => {
+    // Clear database before each test to ensure clean state
     await TestDbHelper.clearAllTables();
-  });
-
-  beforeEach(() => {
+    
+    // Create services after clearing database
     const services = createServices();
     reservationService = services.reservationService;
     productService = services.productService;
@@ -32,6 +31,8 @@ describe("ReservationService", () => {
   describe("createReservation", () => {
     it("should create reservation when stock is available", async () => {
       const category = await categoryService.createCategory(`Category-RES-${Date.now()}-001`);
+      // Verify category exists before creating product
+      await categoryService.getCategoryById(category.id);
       const product = await productService.createProduct(
         "Test Product",
         `SKU-RES-${Date.now()}-001`,
@@ -55,6 +56,8 @@ describe("ReservationService", () => {
 
     it("should throw error if insufficient stock", async () => {
       const category = await categoryService.createCategory(`Category-RES-${Date.now()}-002`);
+      // Verify category exists before creating product
+      await categoryService.getCategoryById(category.id);
       const product = await productService.createProduct(
         "Test Product",
         `SKU-RES-${Date.now()}-002`,
@@ -76,6 +79,8 @@ describe("ReservationService", () => {
 
     it("should consider existing reservations when checking availability", async () => {
       const category = await categoryService.createCategory(`Category-RES-${Date.now()}-003`);
+      // Verify category exists before creating product
+      await categoryService.getCategoryById(category.id);
       const product = await productService.createProduct(
         "Test Product",
         `SKU-RES-${Date.now()}-003`,
@@ -117,6 +122,8 @@ describe("ReservationService", () => {
   describe("consumeReservation", () => {
     it("should consume active reservation", async () => {
       const category = await categoryService.createCategory(`Category-RES-${Date.now()}-004`);
+      // Verify category exists before creating product
+      await categoryService.getCategoryById(category.id);
       const product = await productService.createProduct(
         "Test Product",
         `SKU-RES-${Date.now()}-004`,
@@ -142,6 +149,8 @@ describe("ReservationService", () => {
 
     it("should throw error if reservation is not active", async () => {
       const category = await categoryService.createCategory(`Category-RES-${Date.now()}-005`);
+      // Verify category exists before creating product
+      await categoryService.getCategoryById(category.id);
       const product = await productService.createProduct(
         "Test Product",
         `SKU-RES-${Date.now()}-005`,
@@ -170,6 +179,8 @@ describe("ReservationService", () => {
   describe("releaseReservation", () => {
     it("should release active reservation", async () => {
       const category = await categoryService.createCategory(`Category-RES-${Date.now()}-006`);
+      // Verify category exists before creating product
+      await categoryService.getCategoryById(category.id);
       const product = await productService.createProduct(
         "Test Product",
         `SKU-RES-${Date.now()}-006`,
@@ -197,6 +208,8 @@ describe("ReservationService", () => {
   describe("releaseReservationsByReference", () => {
     it("should release all reservations for a reference", async () => {
       const category = await categoryService.createCategory(`Category-RES-${Date.now()}-007`);
+      // Verify category exists before creating product
+      await categoryService.getCategoryById(category.id);
       const product = await productService.createProduct(
         "Test Product",
         `SKU-RES-${Date.now()}-007`,

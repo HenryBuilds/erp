@@ -14,15 +14,18 @@ export class CategoryService {
     name: string,
     description?: string
   ): Promise<Category> {
+    // Trim name before checking for duplicates
+    const trimmedName = name.trim();
+    
     // Check if category name already exists
-    const existingCategory = await this.categoryRepository.findByName(name);
+    const existingCategory = await this.categoryRepository.findByName(trimmedName);
     if (existingCategory) {
-      throw new Error(`Category with name "${name}" already exists`);
+      throw new Error(`Category with name "${trimmedName}" already exists`);
     }
 
     const category = new Category(
       crypto.randomUUID(),
-      name,
+      trimmedName,
       description ?? null
     );
 
@@ -71,14 +74,17 @@ export class CategoryService {
     const category = await this.getCategoryById(id);
 
     if (updates.name !== undefined) {
+      // Trim name before checking for duplicates
+      const trimmedName = updates.name.trim();
+      
       // Check if new name already exists (excluding current category)
       const existingCategory = await this.categoryRepository.findByName(
-        updates.name
+        trimmedName
       );
       if (existingCategory && existingCategory.id !== id) {
-        throw new Error(`Category with name "${updates.name}" already exists`);
+        throw new Error(`Category with name "${trimmedName}" already exists`);
       }
-      category.name = updates.name;
+      category.name = trimmedName;
     }
 
     if (updates.description !== undefined) {

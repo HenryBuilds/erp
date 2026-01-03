@@ -2,7 +2,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { CodeBlock } from "@/components/code-block"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MermaidDiagram } from "@/components/mermaid-diagram"
-import { ShoppingCart, Plus, X, RotateCcw, Search, ArrowRight } from "lucide-react"
+import { ShoppingCart, Plus, X, RotateCcw, Search, ArrowRight, Info } from "lucide-react"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 export default function OrdersPage() {
   return (
@@ -21,6 +22,17 @@ export default function OrdersPage() {
           </div>
         </div>
       </div>
+
+      {/* Important Notes */}
+      <Alert variant="info">
+        <Info className="h-4 w-4" />
+        <AlertTitle className="text-sm font-medium">Important</AlertTitle>
+        <AlertDescription className="text-sm text-muted-foreground mt-1">
+          Orders require a customer. Create a customer first using{" "}
+          <code className="text-xs bg-muted px-1 py-0.5 rounded">customerService.createCustomer()</code>.
+          Every order must belong to a customer.
+        </AlertDescription>
+      </Alert>
 
       {/* Order Workflow Diagram */}
       <Card className="border-2">
@@ -83,10 +95,24 @@ export default function OrdersPage() {
         </CardHeader>
         <CardContent>
           <CodeBlock
-            code={`import { OrderService } from "commercio";
+            code={`import { createServices } from "commercio";
 
-// Create order
-const order = await orderService.createOrder("customer-123", [
+const { customerService, orderService, categoryService, productService } = createServices();
+
+// First, create a customer
+const customer = await customerService.createCustomer(
+  "John Doe",
+  {
+    street: "123 Main St",
+    city: "Berlin",
+    postalCode: "10115",
+    country: "Germany",
+  },
+  { email: "john.doe@example.com" }
+);
+
+// Create order (customerId is required)
+const order = await orderService.createOrder(customer.id, [
   {
     productId: product.id,
     quantity: 5,
@@ -180,7 +206,8 @@ await orderService.returnOrderItems(
 const order = await orderService.getOrderById(orderId);
 
 // Get all orders for a customer
-const orders = await orderService.getOrdersByCustomer("customer-123");`}
+const customer = await customerService.getCustomerById(customerId);
+const orders = await orderService.getOrdersByCustomer(customer.id);`}
                 />
               </CardContent>
             </Card>

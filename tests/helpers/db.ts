@@ -23,11 +23,22 @@ export class TestDbHelper {
     this.clearingLock = true;
     this.clearingPromise = (async () => {
       try {
-        // Use a single TRUNCATE with all tables to minimize lock contention
-        // Categories must be truncated after products due to foreign key constraint
+        // Disable foreign key checks temporarily for faster truncation
+        await db.execute(sql`SET session_replication_role = 'replica'`);
+        
+        // Use a single TRUNCATE with all tables
         await db.execute(
-          sql`TRUNCATE TABLE order_items, orders, reservations, inventory_transactions, stock, products, categories, warehouses RESTART IDENTITY CASCADE`
+          sql`TRUNCATE TABLE order_items, orders, reservations, inventory_transactions, stock, product_variants, products, categories, warehouses, variant_attributes, customers, customer_groups RESTART IDENTITY CASCADE`
         );
+        
+        // Re-enable foreign key checks
+        await db.execute(sql`SET session_replication_role = 'origin'`);
+        
+        // Ensure changes are committed and visible
+        await db.execute(sql`COMMIT`);
+        
+        // Small delay to ensure database is ready
+        await new Promise(resolve => setTimeout(resolve, 10));
       } finally {
         this.clearingLock = false;
         this.clearingPromise = null;

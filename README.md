@@ -6,6 +6,11 @@ A modular ERP (Enterprise Resource Planning) system for Node.js with PostgreSQL 
 
 - Category management for product organization
 - Product management with SKU support (requires category)
+- Product variants with attribute support (Size, Color, Material, etc.)
+- Variant attribute management
+- Customer management with address, contact details, credit limits, and payment terms
+- Customer groups with discount percentages
+- Order history and statistics tracking
 - Warehouse management (multi-warehouse)
 - Inventory management with transaction history
 - Order management with status workflow
@@ -130,6 +135,8 @@ initDatabase({
 const {
   categoryService,
   productService,
+  productVariantService,
+  variantAttributeService,
   warehouseService,
   stockService,
   orderService,
@@ -147,6 +154,8 @@ import {
   initDatabase,
   createCategoryService,
   createProductService,
+  createProductVariantService,
+  createVariantAttributeService,
   createWarehouseService,
   createStockService,
   createOrderService,
@@ -161,6 +170,8 @@ initDatabase({
 // Create only the services you need
 const categoryService = createCategoryService();
 const productService = createProductService();
+const productVariantService = createProductVariantService();
+const variantAttributeService = createVariantAttributeService();
 const warehouseService = createWarehouseService();
 const stockService = createStockService();
 const orderService = createOrderService();
@@ -257,6 +268,214 @@ await productService.updateProduct(product.id, {
 await productService.deactivateProduct(product.id);
 ```
 
+### Variant Attribute Management
+
+Variant attributes define the types of variations available (e.g., Size, Color, Material).
+
+```typescript
+// Create variant attributes
+const sizeAttribute = await variantAttributeService.createVariantAttribute(
+  "Size"
+);
+const colorAttribute = await variantAttributeService.createVariantAttribute(
+  "Color"
+);
+
+// Get attribute
+const foundAttribute = await variantAttributeService.getVariantAttributeById(
+  sizeAttribute.id
+);
+const attributeByName = await variantAttributeService.getVariantAttributeByName(
+  "Size"
+);
+
+// Get all attributes
+const allAttributes = await variantAttributeService.getAllVariantAttributes();
+const activeAttributes = await variantAttributeService.getAllVariantAttributes(
+  true
+);
+
+// Update attribute
+await variantAttributeService.updateVariantAttribute(sizeAttribute.id, {
+  name: "Product Size",
+});
+
+// Deactivate attribute
+await variantAttributeService.deactivateVariantAttribute(sizeAttribute.id);
+
+// Activate attribute
+await variantAttributeService.activateVariantAttribute(sizeAttribute.id);
+```
+
+### Product Variant Management
+
+Product variants allow you to create different variations of a product (e.g., different sizes, colors).
+
+**Note:** Variants require an existing product. Each variant must have a unique SKU globally and unique attribute values per product.
+
+```typescript
+// First, create a product
+const category = await categoryService.createCategory("Clothing");
+const product = await productService.createProduct(
+  "Premium T-Shirt",
+  "SKU-TSHIRT-BASE",
+  category.id
+);
+
+// Create variant attributes (optional but recommended)
+await variantAttributeService.createVariantAttribute("Size");
+await variantAttributeService.createVariantAttribute("Color");
+
+// Create product variant
+const variant = await productVariantService.createProductVariant(
+  product.id,
+  "SKU-TSHIRT-L-RED",
+  {
+    Size: "L",
+    Color: "Red",
+  }
+);
+
+// Get variant
+const foundVariant = await productVariantService.getProductVariantById(
+  variant.id
+);
+const variantBySku = await productVariantService.getProductVariantBySku(
+  "SKU-TSHIRT-L-RED"
+);
+
+// Find variant by attributes
+const redLarge = await productVariantService.findVariantByAttributes(
+  product.id,
+  { Size: "L", Color: "Red" }
+);
+
+// Get all variants for a product
+const allVariants = await productVariantService.getVariantsByProduct(
+  product.id
+);
+
+// Update variant
+await productVariantService.updateProductVariant(variant.id, {
+  sku: "SKU-TSHIRT-L-RED-NEW",
+  attributeValues: { Size: "XL", Color: "Red" },
+});
+
+// Deactivate variant
+await productVariantService.deactivateProductVariant(variant.id);
+
+// Activate variant
+await productVariantService.activateProductVariant(variant.id);
+
+// Delete variant permanently
+await productVariantService.deleteProductVariant(variant.id);
+```
+
+### Customer Management
+
+```typescript
+// Create customer
+const customer = await customerService.createCustomer(
+  "John Doe",
+  {
+    street: "123 Main St",
+    city: "Berlin",
+    postalCode: "10115",
+    country: "Germany",
+    state: "Berlin",
+  },
+  {
+    email: "john.doe@example.com",
+    phone: "+49 30 12345678",
+  },
+  {
+    creditLimit: 100000, // €1000.00 in cents
+    paymentTerms: PaymentTerms.NET_30,
+  }
+);
+
+// Get customer
+const foundCustomer = await customerService.getCustomerById(customer.id);
+const customerByEmail = await customerService.getCustomerByEmail(
+  "john.doe@example.com"
+);
+
+// Get all customers
+const allCustomers = await customerService.getAllCustomers();
+const activeCustomers = await customerService.getAllCustomers(true);
+
+// Update customer
+await customerService.updateCustomer(customer.id, {
+  name: "John Smith",
+  address: {
+    city: "Munich",
+    postalCode: "80331",
+  },
+  creditLimit: 200000,
+});
+
+// Get customer order history
+const orderHistory = await customerService.getOrderHistory(customer.id);
+
+// Get order history filtered by status
+const completedOrders = await customerService.getOrderHistoryByStatus(
+  customer.id,
+  OrderStatus.COMPLETED
+);
+
+// Get customer order statistics
+const stats = await customerService.getCustomerOrderStatistics(customer.id);
+console.log(`Total orders: ${stats.totalOrders}`);
+console.log(`Total spent: €${(stats.totalSpent / 100).toFixed(2)}`);
+console.log(
+  `Average order value: €${(stats.averageOrderValue / 100).toFixed(2)}`
+);
+
+// Deactivate customer
+await customerService.deactivateCustomer(customer.id);
+
+// Activate customer
+await customerService.activateCustomer(customer.id);
+```
+
+### Customer Groups
+
+```typescript
+// Create customer group
+const vipGroup = await customerService.createCustomerGroup(
+  "VIP Customers",
+  "Premium customer tier",
+  10 // 10% discount
+);
+
+// Get customer group
+const foundGroup = await customerService.getCustomerGroupById(vipGroup.id);
+const groupByName = await customerService.getCustomerGroupByName(
+  "VIP Customers"
+);
+
+// Get all customer groups
+const allGroups = await customerService.getAllCustomerGroups();
+const activeGroups = await customerService.getAllCustomerGroups(true);
+
+// Get customers in a group
+const vipCustomers = await customerService.getCustomersByGroup(vipGroup.id);
+
+// Update customer group
+await customerService.updateCustomerGroup(vipGroup.id, {
+  name: "Premium VIP",
+  discountPercentage: 15,
+});
+
+// Assign customer to group
+await customerService.updateCustomer(customer.id, {
+  customerGroupId: vipGroup.id,
+});
+
+// Deactivate customer group
+await customerService.deactivateCustomerGroup(vipGroup.id);
+```
+
 ### Warehouse Management
 
 ```typescript
@@ -309,9 +528,23 @@ const warehouseStock = await stockService.getStockByWarehouse(warehouse.id);
 
 ### Order Management
 
+**Note:** Orders require a customer. Create a customer first using `customerService.createCustomer()`.
+
 ```typescript
-// Create order
-const order = await orderService.createOrder("customer-123", [
+// First, create a customer
+const customer = await customerService.createCustomer(
+  "John Doe",
+  {
+    street: "123 Main St",
+    city: "Berlin",
+    postalCode: "10115",
+    country: "Germany",
+  },
+  { email: "john.doe@example.com" }
+);
+
+// Create order (customerId is required)
+const order = await orderService.createOrder(customer.id, [
   {
     productId: product.id,
     quantity: 5,
@@ -445,6 +678,49 @@ const productReservations = await reservationService.getReservationsByProduct(
 - `deactivateProduct(id: ProductId): Promise<Product>`
 - `activateProduct(id: ProductId): Promise<Product>`
 
+### VariantAttributeService
+
+- `createVariantAttribute(name: string): Promise<VariantAttribute>`
+- `getVariantAttributeById(id: VariantAttributeId): Promise<VariantAttribute>`
+- `getVariantAttributeByName(name: string): Promise<VariantAttribute>`
+- `getAllVariantAttributes(activeOnly?: boolean): Promise<VariantAttribute[]>`
+- `updateVariantAttribute(id: VariantAttributeId, updates: Partial<{ name: string }>): Promise<VariantAttribute>`
+- `deactivateVariantAttribute(id: VariantAttributeId): Promise<VariantAttribute>`
+- `activateVariantAttribute(id: VariantAttributeId): Promise<VariantAttribute>`
+
+### ProductVariantService
+
+- `createProductVariant(productId: ProductId, sku: string, attributeValues: Record<string, string>): Promise<ProductVariant>`
+- `getProductVariantById(id: ProductVariantId): Promise<ProductVariant>`
+- `getProductVariantBySku(sku: string): Promise<ProductVariant>`
+- `getVariantsByProduct(productId: ProductId): Promise<ProductVariant[]>`
+- `findVariantByAttributes(productId: ProductId, attributeValues: Record<string, string>): Promise<ProductVariant | null>`
+- `updateProductVariant(id: ProductVariantId, updates: Partial<{ sku: string; attributeValues: Record<string, string>; isActive: boolean }>): Promise<ProductVariant>`
+- `deactivateProductVariant(id: ProductVariantId): Promise<ProductVariant>`
+- `activateProductVariant(id: ProductVariantId): Promise<ProductVariant>`
+- `deleteProductVariant(id: ProductVariantId): Promise<void>`
+
+### CustomerService
+
+- `createCustomer(name: string, address: {...}, contact: {...}, options?: {...}): Promise<Customer>`
+- `getCustomerById(id: CustomerId): Promise<Customer>`
+- `getCustomerByEmail(email: string): Promise<Customer>`
+- `getAllCustomers(activeOnly?: boolean): Promise<Customer[]>`
+- `getCustomersByGroup(customerGroupId: CustomerGroupId): Promise<Customer[]>`
+- `updateCustomer(id: CustomerId, updates: Partial<{...}>): Promise<Customer>`
+- `deactivateCustomer(id: CustomerId): Promise<Customer>`
+- `activateCustomer(id: CustomerId): Promise<Customer>`
+- `getOrderHistory(customerId: CustomerId): Promise<Order[]>`
+- `getOrderHistoryByStatus(customerId: CustomerId, status?: string): Promise<Order[]>`
+- `getCustomerOrderStatistics(customerId: CustomerId): Promise<{totalOrders, totalSpent, averageOrderValue, ordersByStatus}>`
+- `createCustomerGroup(name: string, description?: string, discountPercentage?: number): Promise<CustomerGroup>`
+- `getCustomerGroupById(id: CustomerGroupId): Promise<CustomerGroup>`
+- `getCustomerGroupByName(name: string): Promise<CustomerGroup>`
+- `getAllCustomerGroups(activeOnly?: boolean): Promise<CustomerGroup[]>`
+- `updateCustomerGroup(id: CustomerGroupId, updates: Partial<{...}>): Promise<CustomerGroup>`
+- `deactivateCustomerGroup(id: CustomerGroupId): Promise<CustomerGroup>`
+- `activateCustomerGroup(id: CustomerGroupId): Promise<CustomerGroup>`
+
 ### WarehouseService
 
 - `createWarehouse(name: string): Promise<Warehouse>`
@@ -494,16 +770,24 @@ The package uses the following tables:
 
 - `categories` - Product categories
 - `products` - Products (requires category_id)
+- `variant_attributes` - Variant attribute types (Size, Color, etc.)
+- `product_variants` - Product variants with attribute values
+- `customer_groups` - Customer groups with discount percentages
+- `customers` - Customers with address, contact, credit limit, and payment terms
 - `warehouses` - Warehouses
 - `stock` - Stock levels (Product × Warehouse)
 - `inventory_transactions` - Inventory transactions
 - `reservations` - Stock reservations
-- `orders` - Orders
+- `orders` - Orders (references customers)
 - `order_items` - Order items
 
 **Relationships:**
 
 - Products must belong to a category (`products.category_id` → `categories.id`)
+- Product variants belong to products (`product_variants.product_id` → `products.id`)
+- Variants store attribute values as JSON (e.g., `{ "Size": "L", "Color": "Red" }`)
+- Customers can belong to a customer group (`customers.customer_group_id` → `customer_groups.id`)
+- Orders belong to customers (`orders.customer_id` → `customers.id`)
 - Stock entries reference products and warehouses
 - Orders contain order items that reference products
 - Reservations reference products and warehouses

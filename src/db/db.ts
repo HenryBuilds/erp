@@ -10,9 +10,12 @@ let dbInstance: NodePgDatabase<typeof schema> | null = null;
 let poolInstance: Pool | null = null;
 
 // Try to auto-initialize from environment variable
-if (process.env.DATABASE_URL) {
+// Delay initialization for tests to ensure environment variables are set
+if (process.env.DATABASE_URL && !(process.env.NODE_ENV === "test" || process.env.VITEST === "true")) {
   poolInstance = new Pool({
     connectionString: process.env.DATABASE_URL,
+    max: 10,
+    min: 2,
   });
   dbInstance = drizzle(poolInstance, { schema });
   autoInitialized = true;
@@ -23,6 +26,24 @@ if (process.env.DATABASE_URL) {
  * Auto-initializes from DATABASE_URL if available, otherwise uses initDatabase()
  */
 function getDb(): NodePgDatabase<typeof schema> {
+  // For tests, initialize lazily to ensure environment variables are set
+  const isTest = process.env.NODE_ENV === "test" || process.env.VITEST === "true";
+  if (isTest && !autoInitialized && process.env.DATABASE_URL) {
+    poolInstance = new Pool({
+      connectionString: process.env.DATABASE_URL,
+      // Use single connection for tests to avoid isolation issues
+      max: 1,
+      min: 1,
+      // Ensure immediate visibility of committed data
+      idleTimeoutMillis: 0,
+      connectionTimeoutMillis: 5000,
+      // Use proper timeout for test queries
+      statement_timeout: 10000,
+    });
+    dbInstance = drizzle(poolInstance, { schema });
+    autoInitialized = true;
+  }
+  
   if (autoInitialized && dbInstance) {
     return dbInstance;
   }

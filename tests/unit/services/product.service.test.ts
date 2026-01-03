@@ -9,12 +9,11 @@ describe("ProductService", () => {
   let productService: ProductService;
   let categoryService: CategoryService;
 
-  beforeAll(async () => {
-    // Clear database once before all tests in this file
+  beforeEach(async () => {
+    // Clear database before each test to ensure clean state
     await TestDbHelper.clearAllTables();
-  });
-
-  beforeEach(() => {
+    
+    // Create services after clearing database
     const services = createServices();
     productService = services.productService;
     categoryService = services.categoryService;
@@ -25,6 +24,8 @@ describe("ProductService", () => {
       const category = await categoryService.createCategory(
         `Category-TEST-${Date.now()}-001`
       );
+      // Verify category exists before creating product
+      await categoryService.getCategoryById(category.id);
       
       const sku = `SKU-TEST-${Date.now()}-001`;
       const product = await productService.createProduct(
@@ -45,6 +46,8 @@ describe("ProductService", () => {
       const category = await categoryService.createCategory(
         `Category-TEST-${Date.now()}-002`
       );
+      // Verify category exists before creating product
+      await categoryService.getCategoryById(category.id);
       const sku = `SKU-DUPLICATE-${Date.now()}`;
       await productService.createProduct("Product 1", sku, category.id);
 
@@ -57,6 +60,8 @@ describe("ProductService", () => {
       const category = await categoryService.createCategory(
         `Category-TEST-${Date.now()}-003`
       );
+      // Verify category exists before creating product
+      await categoryService.getCategoryById(category.id);
       const product = await productService.createProduct(
         "Test Product",
         `SKU-TEST-${Date.now()}-002`,
@@ -75,6 +80,8 @@ describe("ProductService", () => {
       const category = await categoryService.createCategory(
         `Category-TEST-${Date.now()}-004`
       );
+      // Verify category exists before creating product
+      await categoryService.getCategoryById(category.id);
       const created = await productService.createProduct(
         "Test Product",
         `SKU-TEST-${Date.now()}-003`,
@@ -100,6 +107,8 @@ describe("ProductService", () => {
       const category = await categoryService.createCategory(
         `Category-TEST-${Date.now()}-005`
       );
+      // Verify category exists before creating product
+      await categoryService.getCategoryById(category.id);
       const sku = `SKU-TEST-${Date.now()}-004`;
       await productService.createProduct("Test Product", sku, category.id);
 
@@ -121,6 +130,8 @@ describe("ProductService", () => {
       const category = await categoryService.createCategory(
         `Category-TEST-${Date.now()}-006`
       );
+      // Verify category exists before creating product
+      await categoryService.getCategoryById(category.id);
       const sku = `SKU-TEST-${Date.now()}-005`;
       const created = await productService.createProduct(
         "Original Name",
@@ -142,6 +153,8 @@ describe("ProductService", () => {
       const category = await categoryService.createCategory(
         `Category-TEST-${Date.now()}-007`
       );
+      // Verify category exists before creating product
+      await categoryService.getCategoryById(category.id);
       const sku1 = `SKU-TEST-${Date.now()}-006`;
       const sku2 = `SKU-TEST-${Date.now()}-007`;
       await productService.createProduct("Product 1", sku1, category.id);
@@ -162,6 +175,8 @@ describe("ProductService", () => {
       const category = await categoryService.createCategory(
         `Category-TEST-${Date.now()}-008`
       );
+      // Verify category exists before creating product
+      await categoryService.getCategoryById(category.id);
       const created = await productService.createProduct(
         "Test Product",
         `SKU-TEST-${Date.now()}-008`,
@@ -179,6 +194,8 @@ describe("ProductService", () => {
       const category = await categoryService.createCategory(
         `Category-TEST-${Date.now()}-009`
       );
+      // Verify category exists before creating product
+      await categoryService.getCategoryById(category.id);
       const created = await productService.createProduct(
         "Test Product",
         `SKU-TEST-${Date.now()}-009`,

@@ -86,8 +86,13 @@ export function initDatabase(config: DatabaseConfig): void {
   }
 
   // Create connection pool
+  // For tests, use a smaller pool to reduce connection isolation issues
+  const isTest = process.env.NODE_ENV === "test" || process.env.VITEST === "true";
   poolInstance = new Pool({
     connectionString,
+    // Use smaller pool for tests to reduce connection isolation issues
+    max: isTest ? 1 : undefined,
+    min: isTest ? 1 : undefined,
     ...config.poolConfig,
   });
 

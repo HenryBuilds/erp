@@ -7,12 +7,11 @@ import { TestDbHelper } from "../../helpers/db";
 describe("CategoryService", () => {
   let categoryService: CategoryService;
 
-  beforeAll(async () => {
-    // Clear database once before all tests in this file
+  beforeEach(async () => {
+    // Clear database before each test to ensure clean state
     await TestDbHelper.clearAllTables();
-  });
-
-  beforeEach(() => {
+    
+    // Create services after clearing database
     categoryService = createCategoryService();
   });
 

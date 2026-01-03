@@ -54,6 +54,7 @@ initDatabase({
 const {
   categoryService,
   productService,
+  customerService,
   warehouseService,
   stockService,
   orderService,
@@ -182,6 +183,34 @@ console.log(\`Warehouse created: \${warehouse.id}\`);`}
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold">
               4
             </div>
+            <h2 className="text-2xl font-semibold tracking-tight">Create a Customer</h2>
+          </div>
+          <Card>
+            <CardContent className="pt-6">
+              <CodeBlock
+                code={`// Create a customer (required for orders)
+const customer = await customerService.createCustomer(
+  "John Doe",
+  {
+    street: "123 Main St",
+    city: "Berlin",
+    postalCode: "10115",
+    country: "Germany",
+  },
+  { email: "john.doe@example.com" }
+);
+
+console.log(\`Customer created: \${customer.id}\`);`}
+              />
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold">
+              5
+            </div>
             <h2 className="text-2xl font-semibold tracking-tight">Set Stock</h2>
           </div>
           <Card>
@@ -201,15 +230,15 @@ console.log(\`Current stock: \${stock?.quantity}\`);`}
         <div className="space-y-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold">
-              5
+              6
             </div>
             <h2 className="text-2xl font-semibold tracking-tight">Create an Order</h2>
           </div>
           <Card>
             <CardContent className="pt-6">
               <CodeBlock
-                code={`// Create order
-const order = await orderService.createOrder("customer-123", [
+                code={`// Create order (customerId is required)
+const order = await orderService.createOrder(customer.id, [
   {
     productId: product.id,
     quantity: 5,

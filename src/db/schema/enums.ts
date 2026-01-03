@@ -21,3 +21,11 @@ export const orderStatusEnum = pgEnum("order_status", [
   "CANCELLED",
 ]);
 
+export const paymentTermsEnum = pgEnum("payment_terms", [
+  "NET_15",
+  "NET_30",
+  "NET_60",
+  "DUE_ON_RECEIPT",
+  "PREPAID",
+]);
+

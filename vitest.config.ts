@@ -8,6 +8,12 @@ export default defineConfig({
     setupFiles: ["./tests/setup.ts"],
     // Run tests sequentially to avoid database deadlocks
     maxConcurrency: 1,
+    // Force sequential execution within test files
+    poolOptions: {
+      threads: {
+        singleThread: true,
+      },
+    },
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],

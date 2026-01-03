@@ -254,7 +254,7 @@ initDatabase({
   runMigrations: true,
 });
 
-// Create all services at once - no need to manually inject repositories!
+// Create all services at once
 const { categoryService, productService } = createServices();
 
 // Create a category

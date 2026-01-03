@@ -6,6 +6,10 @@ import { TestDbHelper } from "./helpers/db";
  * Global test setup
  */
 beforeAll(async () => {
+  // Mark that we're running tests
+  process.env.VITEST = "true";
+  process.env.NODE_ENV = "test";
+  
   // Set test database URL if not already set
   if (!process.env.DATABASE_URL) {
     process.env.DATABASE_URL =

@@ -12,7 +12,9 @@ import {
   ShoppingCart, 
   Warehouse,
   FolderTree,
-  FileText
+  FileText,
+  Layers,
+  Users
 } from "lucide-react"
 
 const navigation = [
@@ -40,6 +42,16 @@ const navigation = [
     title: "Products",
     icon: Package,
     href: "/products",
+  },
+  {
+    title: "Product Variants",
+    icon: Layers,
+    href: "/product-variants",
+  },
+  {
+    title: "Customers",
+    icon: Users,
+    href: "/customers",
   },
   {
     title: "Warehouses",
